@@ -1,0 +1,233 @@
+---
+output: html_document
+---
+CE699 Presentation
+========================================================
+## Comparison between SL and 3A classes based on season and train
+Supervisor: Prof. Vinod Vasudevan  
+Presented By: Mohit Shukla  
+Dual-Degree Student  
+Department Of Civil Engineering IIT Kanpur 
+
+
+Content
+========================================================
+
+
+* Literature Review  
+* Clustering
+* Seasonal Variation 
+* Train wise comparison 
+* References
+         
+
+
+Literature Review 
+========================================================
+1. **Heterogeneity in Perceptions of Service Quality among Groups of Railway Passengers**   
+        > Study is done in Milan, Italy to analyze the different perception among groups regarding 
+        transit service quality. Proposed methodology is CART to identify the most influencial 
+        service quality.
+        
+2. **Evaluating the Impact of Rail-Trails: A Methodology for Assessing Travel Demand and Economic Impacts**   
+        > This study explores methods to measure the travel demand and economic impact of developing a rail trail. A methodology is proposed to identify the demand and need for rail-trails and their economic impacts and benefits in Buffalo Valley Rail Trail, Pennsylvania. 
+
+Literature Review 
+========================================================
+3. **An integrated Bayesian approach for passenger flow assignment in metro networks**   
+        > This papere proposed a Bayesian Statistical Inference method to characerize passenger flow assignment model in complex metro networks. They used likelihood of observing passenger travel times provided by smart card data and their prior knowledge about the studied metro network.
+        
+4. **Analysis of the Mobility of Railway Passenger Transport in Small Urban Areas**   
+        > Main purpose behind the railway network is to provide better mobility to passengers. This paper analyses the mobility of passengers by railway in the area of the small town of Varazdin (Croatia).  
+
+Clustering
+========================================================
+* task of grouping a set of objects in such a way that objects in the same group are more similar to each other than to those in other groups.
+*  Hierarchical clustering seeks to build a hierarchy of clusters based on Agglomerative approach.
+* Euclidean distance is used for matrix formation
+* Ward's minimum variance criterion minimizes the total within-cluster vairance. Include pair of clusters that leads to minimum increase in total within-cluster variance after merging.
+        
+Seasonal Variation 
+========================================================
+**Data recorded for JAN-15 01-10** 
+
+```{r echo=FALSE, cache = TRUE}
+library(RCurl)
+library(XML)
+require(gdata)
+library(dplyr)
+data_jan <- read.xls("JAN-15 01-10.xls", sheet = 11,
+                 perl = "C:\\Perl64\\bin\\perl.exe",header=T, skip=3)
+
+data_jan2 <- data_jan[,c(1,2,9,10)]
+data_jan2_cr <- subset(data_jan2, ZONE == "CR")
+data_jan2_cr <- data_jan2_cr[,c(2,3,4)]
+data_jan2_cr <- data_jan2_cr[c(1:6,8),]
+data_jan2_cr <- rename(data_jan2_cr, OccCurrY = CURRENT.YEAR.2, OccLastY = LAST.YEAR.2)
+head(data_jan2_cr)
+```
+Seasonal Variation 
+=================================================================
+**Class Clusters based on occupational status**
+
+```{r echo=FALSE, cache = TRUE}  
+
+vars.to.use_jan <- colnames(data_jan2_cr)[-1]
+pmatrix_jan <- scale(data_jan2_cr[vars.to.use_jan])
+pcenter_jan <- attr(pmatrix_jan,"scaled:center")
+pscale_jan <- attr(pmatrix_jan,"scaled:scale")
+d_jan <- dist(pmatrix_jan, method="euclidian")
+pfit_jan <- hclust(d_jan,method="ward.D")
+
+groups_jan <- cutree(pfit_jan,k=5)
+print_clusters_jan <- function(labels,k){
+        for (i in 1:k){
+                #print (paste("cluster",i))
+                print (data_jan2_cr[labels == i,c("CLASS", "OccCurrY", "OccLastY")])
+        }
+}
+print_clusters_jan(groups_jan,5)
+
+```
+
+Seasonal Variation
+========================================================
+**Cluster Visualization**
+```{r, echo=FALSE, fig.width = 16, fig.height = 10}
+
+#plot(pfit_jan,labels=data_jan2_cr$CLASS)
+library(sparcl)
+par(cex=2.5)
+plot(pfit_jan,labels=data_jan2_cr$CLASS, main = "Class clusters in January")
+#ColorDendrogram(pfit_jan,labels=data_jan2_cr$CLASS, main = "Class clusters in January", y=d_jan)
+
+```
+
+Seasonal Variation
+========================================================
+**Data recorded for MAY-15 01-10** 
+```{r echo=FALSE, cache = TRUE}
+data_may <- read.xls("MAY-15 01-10.xls", sheet = 11,
+                     perl = "C:\\Perl64\\bin\\perl.exe",header=T, skip=3)
+data_may2 <- data_may[,c(1,2,9,10)]
+data_may2_cr <- subset(data_may2, ZONE == "CR")
+data_may2_cr <- data_may2_cr[,c(2,3,4)]
+data_may2_cr <- data_may2_cr[c(1:9),]
+data_may2_cr <- rename(data_may2_cr, OccCurrY = CURRENT.YEAR.2, OccLastY = LAST.YEAR.2)
+data_may2_cr <- data_may2_cr[1:7,]
+head(data_may2_cr)
+```
+Seasonal Variation
+=================================================================
+**Class Clusters based on occupational status**
+
+```{r echo=FALSE, cache = TRUE}  
+
+vars.to.use <- colnames(data_may2_cr)[-1]
+pmatrix <- scale(data_may2_cr[vars.to.use])
+pcenter <- attr(pmatrix,"scaled:center")
+pscale <- attr(pmatrix,"scaled:scale")
+d <- dist(pmatrix, method="euclidian")
+pfit <- hclust(d,method="ward.D")
+groups_may <- cutree(pfit,k=5)
+print_clusters_may <- function(labels,k){
+        for (i in 1:k){
+                #print (paste("cluster",i))
+                print(data_may2_cr[labels == i,c("CLASS", "OccCurrY", "OccLastY")])
+        }
+}
+print_clusters_may(groups_may,5)
+```
+
+Seasonal Variation
+========================================================
+**Cluster Visualization**
+
+```{r, echo=FALSE, fig.width = 16, fig.height = 10}
+
+library(sparcl)
+par(cex=2.5)
+#plot(pfit,d,labels = data_may2_cr$CLASS)
+#windows(record=TRUE, width=6, height=6)
+plot(pfit,labels=data_may2_cr$CLASS, main = "Class clusters in May")
+#ColorDendrogram(pfit,labels=data_may2_cr$CLASS, main = "may_cluster", y=d)
+```
+
+
+Train wise comparison
+==========================================================
+**Comparison of 3A and SL classes of 4 selected trains of Central Railway**
+
+* Coimbatore Exp  (Mumbai to Bangalore)
+* Kushinagar Exp   (Mumbai to Gorakhpur)
+* Jhelum Express   (Jammu to Pune)
+* Kolkata Mail   (Mumbai to Howrah)  
+
+Train wise comparison
+========================================================
+**Class clustering**    
+```{r, echo=FALSE}
+library(ggplot2)
+library(XML)
+data <- htmlParse("CR.txt")
+data1 <- readHTMLTable(data)
+data2 <- data.frame(data1)
+data2 <- as.data.frame(data2)
+class_data <- data2[,c(3,4,7,8,10)]
+train <- class_data[,1]
+class <- class_data[,2]
+passengers <- class_data[,3]
+passengers <- as.numeric(levels(passengers))[passengers]
+utilization <- class_data[,4]
+utilization <- as.numeric(levels(utilization))[utilization]
+
+dataframe_cr <- data.frame(train,class,passengers,utilization)
+dataframe_cr = dataframe_cr[dataframe_cr$train != "TOTAL",]
+final_set_cr <- subset(dataframe_cr, train == "COIMBATORE EXP" | 
+                            train == "KUSHINAGAR EXP" | 
+                            train == "JHELUM EXPRESS" | train == "KOLKATA MAIL")
+
+for ( i in 1:dim(final_set_cr)[1] ){
+        final_set_cr$tclass[i] <- paste(final_set_cr[i,1],final_set_cr[i,2]) 
+}
+
+final_set_cr <- final_set_cr[,3:5]
+vars.to.use_cr <- colnames(final_set_cr)[-3]
+pmatrix_cr <- scale(final_set_cr[vars.to.use_cr])
+pcenter_cr <- attr(pmatrix_cr,"scaled:center")
+pscale_cr <- attr(pmatrix_cr,"scaled:scale")
+d_cr <- dist(pmatrix_cr, method="euclidian")
+pfit_cr <- hclust(d_cr,method="ward.D")
+groups_cr <- cutree(pfit_cr,k=4)
+print_clusters_cr <- function(labels,k){
+        for (i in 1:k){
+                
+                print(final_set_cr[labels == i,c("passengers", "utilization","tclass")])
+                #print(data_may2_cr[labels == i,c("CLASS", "OccCurrY", "OccLastY")])
+        }
+}
+print_clusters_cr(groups_cr,4)
+
+```
+
+Train wise comparison
+========================================================
+**Cluster Visualization**
+```{r, echo=FALSE, fig.width = 16, fig.height = 9.5}
+par(cex=2)
+plot(pfit_cr,labels=final_set_cr$tclass, main = "Class Clusters for 4 trains")
+#ColorDendrogram(pfit_cr,labels=final_set_cr$tclass, main = "Class Clusters for 4 trains", y=d_cr)
+
+```
+
+References
+==========================================================
+* ['International Journal of Sustainable Transportation Volume 9, Issue 7,2015'](http://www.tandfonline.com/doi/abs/10.1080/15568318.2013.825035)
+* ['International Journal of Sustainable Transportation Volume 9, Issue 8, 2015'](http://www.tandfonline.com/doi/abs/10.1080/15568318.2013.849318?journalCode=ujst20#.VaP8o_mqqko)
+* ['An integrated Bayesian approach for passenger flow assignment in metro networks'](http://www.sciencedirect.com/science/article/pii/S0968090X15000030)
+* ['Analysis Of The Mobility Of Railway Passenger Transport In Small Urban Areas'](http://www.witpress.com/elibrary/wit-transactions-on-the-built-environment/146/34126)
+* ['R
+eserved passenger data warehouse of Indian Railway'](http://www.dw.indianrail.gov.in/)
+
+
+
