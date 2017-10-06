@@ -1,5 +1,3 @@
-CE699 Presentation
-========================================================
 ## Comparison between SL and 3A classes based on season and train
 Supervisor: Prof. Vinod Vasudevan  
 Presented By: Mohit Shukla  
